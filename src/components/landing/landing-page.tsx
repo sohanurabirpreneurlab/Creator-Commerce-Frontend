@@ -495,7 +495,7 @@ function Footer() {
 
         <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Creators Commerce. All rights reserved.</p>
-          <p>Commerce-first creator attribution and analytics.</p>
+          <p>Powered by The Marvel - Be You and Preneur Lab Limited</p>
         </div>
       </div>
     </footer>
