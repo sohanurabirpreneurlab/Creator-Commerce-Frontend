@@ -1,0 +1,74 @@
+import { useEffect, useMemo, useState } from "react";
+import * as authApi from "@/lib/auth-api";
+import { AuthContext } from "@/contexts/auth-context";
+import { AuthResult, AuthUser } from "@/types/auth";
+
+type StoredAuthSession = {
+  token: string;
+  user: AuthUser;
+};
+
+const STORAGE_KEY = "creator-commerce-auth";
+
+function getStoredSession(): StoredAuthSession | null {
+  const rawValue = window.localStorage.getItem(STORAGE_KEY);
+
+  if (!rawValue) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawValue) as StoredAuthSession;
+  } catch {
+    window.localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    const storedSession = getStoredSession();
+
+    if (storedSession) {
+      setToken(storedSession.token);
+      setUser(storedSession.user);
+    }
+  }, []);
+
+  const persistSession = (session: AuthResult) => {
+    setToken(session.token);
+    setUser(session.user);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  };
+
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+    window.localStorage.removeItem(STORAGE_KEY);
+  };
+
+  const value = useMemo(
+    () => ({
+      token,
+      user,
+      isAuthenticated: Boolean(token && user),
+      login: async (payload: Parameters<typeof authApi.login>[0]) => {
+        const session = await authApi.login(payload);
+        persistSession(session);
+        return session;
+      },
+      signUp: async (payload: Parameters<typeof authApi.signUp>[0]) => {
+        const session = await authApi.signUp(payload);
+        persistSession(session);
+        return session;
+      },
+      logout,
+    }),
+    [token, user],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}

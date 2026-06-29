@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { ArrowRight, LoaderCircle, ShieldCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,18 +12,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 type AuthMode = "login" | "signup";
 
 type LoginFormValues = {
-  emailOrMobile: string;
+  identifier: string;
   password: string;
 };
 
 type SignupFormValues = {
   name: string;
   email: string;
+  password: string;
   mobileNumber: string;
   address: string;
   gender: string;
@@ -51,6 +53,14 @@ function FieldError({ message }: { message?: string }) {
   return <p className="mt-2 text-xs font-medium text-rose-500">{message}</p>;
 }
 
+function FormSuccess({ message }: { message: string }) {
+  return (
+    <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+      {message}
+    </div>
+  );
+}
+
 function SocialButtons() {
   return (
     <div className="flex flex-wrap gap-3">
@@ -71,29 +81,44 @@ function SocialButtons() {
   );
 }
 
-function LoginForm() {
+function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+  const { login } = useAuth();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     defaultValues: {
-      emailOrMobile: "",
+      identifier: "",
       password: "",
     },
   });
 
-  const onSubmit = () => undefined;
+  const onSubmit = async (values: LoginFormValues) => {
+    setServerError(null);
+    try {
+      await login(values);
+      setSuccessMessage("Login successful.");
+      onSuccess();
+    } catch (error) {
+      setSuccessMessage(null);
+      setServerError(
+        error instanceof Error ? error.message : "Unable to login right now.",
+      );
+    }
+  };
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <Label htmlFor="emailOrMobile">Email or Mobile Number</Label>
+        <Label htmlFor="identifier">Email or Mobile Number</Label>
         <Input
-          id="emailOrMobile"
+          id="identifier"
           className="mt-2"
           placeholder="you@brand.com or +8801XXXXXXXXX"
-          {...register("emailOrMobile", {
+          {...register("identifier", {
             required: "Email or mobile number is required.",
             minLength: {
               value: 6,
@@ -101,7 +126,7 @@ function LoginForm() {
             },
           })}
         />
-        <FieldError message={errors.emailOrMobile?.message} />
+        <FieldError message={errors.identifier?.message} />
       </div>
 
       <div>
@@ -122,30 +147,35 @@ function LoginForm() {
         <FieldError message={errors.password?.message} />
       </div>
 
-      <Button type="submit" size="lg" className="mt-1 w-full gap-2">
-        Login
-        <ArrowRight className="h-4 w-4" />
+      <Button type="submit" size="lg" className="mt-1 w-full gap-2" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <LoaderCircle className="h-4 w-4 animate-spin" />
+        ) : (
+          <>
+            Login
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
       </Button>
 
-      {isSubmitSuccessful ? (
-        <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" />
-          Validation passed. Connect your real auth API next.
-        </div>
-      ) : null}
+      {serverError ? <FieldError message={serverError} /> : null}
+      {successMessage ? <FormSuccess message={successMessage} /> : null}
     </form>
   );
 }
 
-function SignupForm() {
+function SignupForm({ onSuccess }: { onSuccess: () => void }) {
+  const { signUp } = useAuth();
+  const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<SignupFormValues>({
     defaultValues: {
       name: "",
       email: "",
+      password: "",
       mobileNumber: "",
       address: "",
       gender: "",
@@ -153,7 +183,19 @@ function SignupForm() {
     },
   });
 
-  const onSubmit = () => undefined;
+  const onSubmit = async (values: SignupFormValues) => {
+    setServerError(null);
+    try {
+      await signUp(values);
+      onSuccess();
+    } catch (error) {
+      setServerError(
+        error instanceof Error
+          ? error.message
+          : "Unable to create your account right now.",
+      );
+    }
+  };
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -191,6 +233,24 @@ function SignupForm() {
             })}
           />
           <FieldError message={errors.email?.message} />
+        </div>
+
+        <div>
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            className="mt-2"
+            placeholder="At least 8 characters"
+            {...register("password", {
+              required: "Password is required.",
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters.",
+              },
+            })}
+          />
+          <FieldError message={errors.password?.message} />
         </div>
 
         <div>
@@ -259,17 +319,18 @@ function SignupForm() {
         <FieldError message={errors.dateOfBirth?.message} />
       </div>
 
-      <Button type="submit" size="lg" className="mt-1 w-full gap-2">
-        Create Account
-        <ArrowRight className="h-4 w-4" />
+      <Button type="submit" size="lg" className="mt-1 w-full gap-2" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <LoaderCircle className="h-4 w-4 animate-spin" />
+        ) : (
+          <>
+            Create Account
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
       </Button>
 
-      {isSubmitSuccessful ? (
-        <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" />
-          Validation passed. Connect your real registration API next.
-        </div>
-      ) : null}
+      {serverError ? <FieldError message={serverError} /> : null}
     </form>
   );
 }
@@ -289,6 +350,17 @@ export function AuthModal({
         : "Login to continue into your Creators Commerce workspace.",
     [isSignup],
   );
+
+  const handleAuthSuccess = () => {
+    onOpenChange(false);
+  };
+
+  const handleSignupSuccess = () => {
+    handleAuthSuccess();
+  };
+
+  const handleLoginClick = () => onModeChange("login");
+  const handleSignupClick = () => onModeChange("signup");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -327,7 +399,7 @@ export function AuthModal({
               <div className="flex gap-2 rounded-full bg-slate-100 p-1">
                 <button
                   type="button"
-                  onClick={() => onModeChange("login")}
+                  onClick={handleLoginClick}
                   className={cn(
                     "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                     !isSignup
@@ -339,7 +411,7 @@ export function AuthModal({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onModeChange("signup")}
+                  onClick={handleSignupClick}
                   className={cn(
                     "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                     isSignup
@@ -366,7 +438,11 @@ export function AuthModal({
               </div>
 
               <div className={cn(isSignup ? "pb-2" : "")}>
-                {isSignup ? <SignupForm /> : <LoginForm />}
+                {isSignup ? (
+                  <SignupForm onSuccess={handleSignupSuccess} />
+                ) : (
+                  <LoginForm onSuccess={handleAuthSuccess} />
+                )}
               </div>
             </div>
           </div>
