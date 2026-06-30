@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import * as authApi from "@/lib/auth-api";
 import { AuthContext } from "@/contexts/auth-context";
-import { AuthResult, AuthUser } from "@/types/auth";
+import { AuthResult, AuthUser, UserRole } from "@/types/auth";
 
 type StoredAuthSession = {
   token: string;
@@ -9,6 +9,14 @@ type StoredAuthSession = {
 };
 
 const STORAGE_KEY = "creator-commerce-auth";
+
+function isValidRole(role: unknown): role is UserRole {
+  return (
+    role === "CREATOR" ||
+    role === "BRAND_MANAGER" ||
+    role === "SUPER_ADMIN"
+  );
+}
 
 function getStoredSession(): StoredAuthSession | null {
   const rawValue = window.localStorage.getItem(STORAGE_KEY);
@@ -18,7 +26,24 @@ function getStoredSession(): StoredAuthSession | null {
   }
 
   try {
-    return JSON.parse(rawValue) as StoredAuthSession;
+    const parsedSession = JSON.parse(rawValue) as Partial<StoredAuthSession>;
+
+    // Older sessions may not contain role yet. Force logout instead of defaulting,
+    // so dashboard UI does not make role assumptions from stale client state.
+    if (!parsedSession.user || !isValidRole(parsedSession.user.role)) {
+      window.localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+
+    if (!parsedSession.token) {
+      window.localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+
+    return {
+      token: parsedSession.token,
+      user: parsedSession.user as AuthUser,
+    };
   } catch {
     window.localStorage.removeItem(STORAGE_KEY);
     return null;

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ArrowRight, LoaderCircle, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -83,6 +84,7 @@ function SocialButtons() {
 
 function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const {
@@ -101,6 +103,8 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     try {
       await login(values);
       setSuccessMessage("Login successful.");
+      // Send authenticated users directly into the dashboard shell after login.
+      navigate("/dashboard");
       onSuccess();
     } catch (error) {
       setSuccessMessage(null);
@@ -166,6 +170,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
 function SignupForm({ onSuccess }: { onSuccess: () => void }) {
   const { signUp } = useAuth();
+  const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -187,6 +192,8 @@ function SignupForm({ onSuccess }: { onSuccess: () => void }) {
     setServerError(null);
     try {
       await signUp(values);
+      // Signup currently returns a session, so new users can continue into the dashboard.
+      navigate("/dashboard");
       onSuccess();
     } catch (error) {
       setServerError(

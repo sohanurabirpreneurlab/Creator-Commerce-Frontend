@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LogOut, Menu, Search, Settings, User } from "lucide-react";
+import { Link } from "react-router-dom";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,9 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-30 border-b border-white/60 bg-white/80 backdrop-blur-xl">
         <div className="container-shell flex h-20 items-center justify-between gap-6">
-          <Logo />
+          <Link to="/" className="shrink-0">
+            <Logo />
+          </Link>
 
           <nav className="hidden items-center gap-8 lg:flex">
             {navItems.map((item) => (
@@ -69,6 +72,14 @@ export function Navbar() {
                 {item.label}
               </a>
             ))}
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="text-sm font-medium text-muted transition-colors hover:text-foreground"
+              >
+                Dashboard
+              </Link>
+            ) : null}
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
@@ -96,20 +107,22 @@ export function Navbar() {
 
                 {profileMenuOpen ? (
                   <div className="absolute right-0 mt-3 w-56 rounded-3xl border border-border bg-white p-2 shadow-hero">
-                    <button
-                      type="button"
+                    <Link
+                      to="/dashboard/profile"
+                      onClick={() => setProfileMenuOpen(false)}
                       className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
                     >
                       <User className="h-4 w-4 text-primary-dark" />
-                      Profile
-                    </button>
-                    <button
-                      type="button"
+                      <span className="w-full text-left">Profile</span>
+                    </Link>
+                    <Link
+                      to="/dashboard/settings"
+                      onClick={() => setProfileMenuOpen(false)}
                       className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
                     >
                       <Settings className="h-4 w-4 text-primary-dark" />
-                      Settings
-                    </button>
+                      <span className="w-full text-left">Settings</span>
+                    </Link>
                     <button
                       type="button"
                       onClick={() => {
@@ -152,20 +165,22 @@ export function Navbar() {
                 </button>
                 {profileMenuOpen ? (
                   <div className="absolute right-0 mt-3 w-48 rounded-3xl border border-border bg-white p-2 shadow-hero">
-                    <button
-                      type="button"
+                    <Link
+                      to="/dashboard/profile"
+                      onClick={() => setProfileMenuOpen(false)}
                       className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
                     >
                       <User className="h-4 w-4 text-primary-dark" />
-                      Profile
-                    </button>
-                    <button
-                      type="button"
+                      <span className="w-full text-left">Profile</span>
+                    </Link>
+                    <Link
+                      to="/dashboard/settings"
+                      onClick={() => setProfileMenuOpen(false)}
                       className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
                     >
                       <Settings className="h-4 w-4 text-primary-dark" />
-                      Settings
-                    </button>
+                      <span className="w-full text-left">Settings</span>
+                    </Link>
                     <button
                       type="button"
                       onClick={() => {
