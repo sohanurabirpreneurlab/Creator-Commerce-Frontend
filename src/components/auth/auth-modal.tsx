@@ -354,7 +354,7 @@ export function AuthModal({
     () =>
       isSignup
         ? ""
-        : "Login to continue into your Creators Commerce workspace.",
+        : "Login to continue into your Creators Lab workspace.",
     [isSignup],
   );
 

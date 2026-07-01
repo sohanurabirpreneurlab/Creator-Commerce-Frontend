@@ -189,7 +189,7 @@ function SolutionSection() {
           <SectionHeading
             eyebrow="Solution"
             title="One platform to launch, track, and measure creator campaigns"
-            description="Creators Commerce unifies creator discovery, campaign operations, unique link generation, attribution, analytics, and performance rewards into one commerce-first workflow."
+            description="Creators Lab unifies creator discovery, campaign operations, unique link generation, attribution, analytics, and performance rewards into one commerce-first workflow."
           />
           <div className="mt-8 space-y-4">
             {[
@@ -436,7 +436,7 @@ function FinalCtaSection() {
           Move influencer marketing from views and likes to real commerce outcomes.
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/80">
-          Join the teams using Creators Commerce to launch campaigns, measure
+          Join the teams using Creators Lab to launch campaigns, measure
           performance, and reward creators based on actual revenue impact.
         </p>
         <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
@@ -467,7 +467,7 @@ function Footer() {
           <div>
             <Logo />
             <p className="mt-5 max-w-sm text-sm leading-7 text-muted">
-              Creators Commerce is an AI-powered, commerce-first influencer
+              Creators Lab is an AI-powered, commerce-first influencer
               marketing platform built to track sales, measure ROI, and reward
               creator performance with confidence.
             </p>
@@ -494,7 +494,7 @@ function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Creators Commerce. All rights reserved.</p>
+          <p>© 2026 Creators Lab. All rights reserved.</p>
           <p>Powered by The Marvel - Be You and Preneur Lab Limited</p>
         </div>
       </div>

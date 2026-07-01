@@ -6,7 +6,7 @@ export function Logo() {
       </div>
       <div>
         <p className="text-sm font-extrabold tracking-tight text-foreground">
-          Creators Commerce
+          Creators Lab
         </p>
         <p className="text-xs text-muted">Commerce-first influencer growth</p>
       </div>
