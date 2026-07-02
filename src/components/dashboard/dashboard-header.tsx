@@ -1,20 +1,12 @@
 import { LogOut } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { sidebarItems } from "@/config/sidebar-items";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { RoleBadge } from "./role-badge";
 import { NotificationBell } from "./notifications/notification-bell";
-
-function getPageMeta(pathname: string) {
-  return sidebarItems.find((item) => item.path === pathname);
-}
 
 export function DashboardHeader() {
   const { logout, user } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
-  const pageMeta = getPageMeta(location.pathname);
 
   if (!user) {
     return null;

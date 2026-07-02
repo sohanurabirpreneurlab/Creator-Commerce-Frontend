@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  ChevronRight,
   MousePointerClick,
   MoveUpRight,
   ShoppingBag,
