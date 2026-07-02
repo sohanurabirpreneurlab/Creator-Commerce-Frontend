@@ -320,7 +320,7 @@ export function AmbassadorsPage() {
                     <td className="px-6 py-4">{ambassador.source.replaceAll("_", " ")}</td>
                     <td className="px-6 py-4">{formatDate(ambassador.joinedAt)}</td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
                         <Button type="button" variant="outline" className="justify-start gap-2" onClick={() => { setSelectedAmbassador(ambassador); setIsDetailsOpen(true); }}>
                           <Eye className="h-4 w-4" />
                           View

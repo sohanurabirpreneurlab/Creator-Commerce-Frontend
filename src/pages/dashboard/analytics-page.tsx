@@ -9,8 +9,13 @@ import type {
 } from "@/types/analytics";
 import { DataTableEmptyState } from "@/components/dashboard/data-table-empty-state";
 import { TableLoadingState } from "@/components/dashboard/table-loading-state";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  BreakdownBarCard,
+  BreakdownDonutCard,
+  DashboardMetricCard,
+} from "@/components/dashboard/dashboard-visuals";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Something went wrong.";
@@ -102,43 +107,23 @@ export function AnalyticsPage() {
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {summaryEntries.map((entry) => (
-              <Card key={entry.label} className="p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-                  {entry.label}
-                </p>
-                <p className="mt-2 text-3xl font-extrabold text-foreground">{entry.value}</p>
-              </Card>
+              <DashboardMetricCard
+                key={entry.label}
+                label={entry.label}
+                value={entry.value}
+              />
             ))}
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="p-6">
-              <h2 className="text-xl font-extrabold tracking-tight text-foreground">
-                Campaign Status Breakdown
-              </h2>
-              <div className="mt-4 space-y-3">
-                {analytics.campaignStatusBreakdown.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm">
-                    <span>{item.label.replaceAll("_", " ")}</span>
-                    <span className="font-bold text-foreground">{item.count}</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="text-xl font-extrabold tracking-tight text-foreground">
-                Application Status Breakdown
-              </h2>
-              <div className="mt-4 space-y-3">
-                {analytics.applicationStatusBreakdown.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm">
-                    <span>{item.label.replaceAll("_", " ")}</span>
-                    <span className="font-bold text-foreground">{item.count}</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
+          <div className="grid gap-6 xl:grid-cols-2">
+            <BreakdownBarCard
+              title="Campaign Status Breakdown"
+              items={analytics.campaignStatusBreakdown}
+            />
+            <BreakdownDonutCard
+              title="Application Status Breakdown"
+              items={analytics.applicationStatusBreakdown}
+            />
           </div>
 
           <Card className="p-6">

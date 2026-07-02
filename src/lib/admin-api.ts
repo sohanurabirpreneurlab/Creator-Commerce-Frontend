@@ -1,4 +1,4 @@
-import { env } from "@/config/env";
+import { apiRequest } from "@/lib/api-request";
 import type { AdminAnalyticsResponse } from "@/types/analytics";
 import type {
   AdminUserSummary,
@@ -20,7 +20,6 @@ import type {
   UpdateBrandStatusPayload,
 } from "@/types/brand";
 import type {
-  CampaignApiErrorResponse,
   CampaignApiSuccessResponse,
   CampaignApplicationsQuery,
   ManagedCampaign,
@@ -49,23 +48,7 @@ type PaginatedResult<T> = {
 };
 
 async function request<T>(path: string, token: string, options: RequestInit = {}) {
-  const response = await fetch(`${env.apiBaseUrl}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(options.headers ?? {}),
-    },
-    ...options,
-  });
-
-  const payload = (await response.json()) as
-    | CampaignApiSuccessResponse<T>
-    | CampaignApiErrorResponse;
-
-  if (!response.ok || !payload.success) {
-    throw new Error(payload.message || "Request failed.");
-  }
-
+  const payload = await apiRequest<T>(path, { ...options, token });
   return payload;
 }
 

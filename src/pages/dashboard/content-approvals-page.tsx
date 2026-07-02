@@ -86,6 +86,8 @@ export function ContentApprovalsPage() {
         ? await getBrandContentSubmissions(token, params)
         : await getAdminContentSubmissions(token, params);
 
+        console.log('result',response);
+        
       setSubmissions(response.data);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
@@ -266,7 +268,7 @@ export function ContentApprovalsPage() {
                     <td className="px-6 py-4">{formatDate(submission.submittedAt)}</td>
                     <td className="px-6 py-4">{formatDate(submission.reviewedAt)}</td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
                         <Button type="button" variant="outline" className="justify-start gap-2" onClick={() => { setSelectedSubmission(submission); setIsDetailsOpen(true); }}>
                           <Eye className="h-4 w-4" />
                           View

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { RefreshCcw, Search } from "lucide-react";
+import { Copy, ExternalLink, RefreshCcw, Search } from "lucide-react";
 import { CampaignDetailsModal } from "@/components/dashboard/campaigns/campaign-details-modal";
 import { DataTableEmptyState } from "@/components/dashboard/data-table-empty-state";
 import { StatusBadge } from "@/components/dashboard/status-badge";
@@ -45,6 +45,7 @@ export function MyApplicationsPage() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
   const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
+  const [copiedTrackingLinkId, setCopiedTrackingLinkId] = useState<string | null>(null);
 
   async function loadApplications() {
     if (!token) {
@@ -128,6 +129,24 @@ export function MyApplicationsPage() {
       setErrorMessage(getErrorMessage(error));
     } finally {
       setWithdrawingId(null);
+    }
+  };
+
+  const handleCopyTrackingLink = async (application: CreatorApplication) => {
+    if (!application.trackingLink) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(application.trackingLink.trackingUrl);
+      setCopiedTrackingLinkId(application.trackingLink.id);
+      window.setTimeout(() => {
+        setCopiedTrackingLinkId((current) =>
+          current === application.trackingLink?.id ? null : current,
+        );
+      }, 1800);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -215,6 +234,7 @@ export function MyApplicationsPage() {
                   <th className="px-6 py-4">Proposed Content</th>
                   <th className="px-6 py-4">Platform</th>
                   <th className="px-6 py-4">Expected Post Date</th>
+                  <th className="px-6 py-4">Tracking Link</th>
                   <th className="px-6 py-4">Applied At</th>
                   <th className="px-6 py-4">Actions</th>
                 </tr>
@@ -242,6 +262,48 @@ export function MyApplicationsPage() {
                     </td>
                     <td className="px-6 py-4">
                       {formatDate(application.expectedPostDate)}
+                    </td>
+                    <td className="px-6 py-4">
+                      {application.trackingLink ? (
+                        <div className="grid gap-2">
+                          <a
+                            href={application.trackingLink.trackingUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="max-w-xs truncate text-sky-700 underline underline-offset-4"
+                          >
+                            {application.trackingLink.trackingUrl}
+                          </a>
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => void handleCopyTrackingLink(application)}
+                            >
+                              <Copy className="mr-2 h-4 w-4" />
+                              {copiedTrackingLinkId === application.trackingLink.id
+                                ? "Copied"
+                                : "Copy"}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() =>
+                                window.open(
+                                  application.trackingLink?.trackingUrl,
+                                  "_blank",
+                                  "noopener,noreferrer",
+                                )
+                              }
+                            >
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Open
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        "Not generated"
+                      )}
                     </td>
                     <td className="px-6 py-4">{formatDate(application.appliedAt)}</td>
                     <td className="px-6 py-4">

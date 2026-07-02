@@ -1,4 +1,4 @@
-import { env } from "@/config/env";
+import { apiRequest } from "@/lib/api-request";
 import type {
   BrandAmbassador,
   BrandAmbassadorQuery,
@@ -8,9 +8,9 @@ import type {
 } from "@/types/brand-ambassador";
 import type { BrandAnalyticsResponse } from "@/types/analytics";
 import type {
-  CampaignApiErrorResponse,
   CampaignApiSuccessResponse,
   CampaignApplicationsQuery,
+  ApproveApplicationResponse,
   ManagedCampaign,
   ManagedCampaignsQuery,
   ReviewerApplication,
@@ -32,23 +32,7 @@ type PaginatedResult<T> = {
 };
 
 async function request<T>(path: string, token: string, options: RequestInit = {}) {
-  const response = await fetch(`${env.apiBaseUrl}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(options.headers ?? {}),
-    },
-    ...options,
-  });
-
-  const payload = (await response.json()) as
-    | CampaignApiSuccessResponse<T>
-    | CampaignApiErrorResponse;
-
-  if (!response.ok || !payload.success) {
-    throw new Error(payload.message || "Request failed.");
-  }
-
+  const payload = await apiRequest<T>(path, { ...options, token });
   return payload;
 }
 
@@ -211,7 +195,7 @@ export async function approveBrandCreatorApplication(
   token: string,
   applicationId: string,
 ) {
-  const response = await request<ReviewerApplication>(
+  const response = await request<ApproveApplicationResponse>(
     `/brand/creator-applications/${applicationId}/approve`,
     token,
     { method: "PATCH" },

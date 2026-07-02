@@ -326,7 +326,7 @@ export function CampaignsPage() {
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-slate-50">
                 <tr className="text-left text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-                  <th className="px-6 py-4">Title</th>
+                  <th className="px-10 py-4">Title</th>
                   <th className="px-6 py-4">Brand</th>
                   <th className="px-6 py-4">Objective</th>
                   <th className="px-6 py-4">Budget</th>
@@ -340,11 +340,11 @@ export function CampaignsPage() {
               <tbody className="divide-y divide-slate-100 bg-white text-sm text-slate-700">
                 {campaigns.map((campaign) => (
                   <tr key={campaign.id} className="align-top">
-                    <td className="px-6 py-4">
+                    <td className="px-1 py-4">
                       <p className="font-semibold text-foreground">{campaign.title}</p>
-                      <p className="mt-1 max-w-xs text-xs text-muted">
+                      {/* <p className="mt-1 max-w-xs text-xs text-muted">
                         {campaign.description || "No description provided yet."}
-                      </p>
+                      </p> */}
                     </td>
                     <td className="px-6 py-4">{campaign.brand.name}</td>
                     <td className="px-6 py-4">{campaign.objective.replaceAll("_", " ")}</td>
@@ -356,7 +356,7 @@ export function CampaignsPage() {
                     <td className="px-6 py-4">{formatDate(campaign.endDate)}</td>
                     <td className="px-6 py-4">{formatDate(campaign.createdAt)}</td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-2">
+                      <div className="flex  gap-2">
                           <Button
                             type="button"
                             variant="outline"
@@ -477,9 +477,9 @@ export function CampaignsPage() {
         <DialogContent className="w-[95vw] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCampaign ? "Edit campaign" : "Create campaign"}</DialogTitle>
-            <DialogDescription>
+            {/* <DialogDescription>
               The form stays intentionally close to the backend campaign shape so it is easy to review and maintain.
-            </DialogDescription>
+            </DialogDescription> */}
           </DialogHeader>
 
           <div className="grid gap-4">

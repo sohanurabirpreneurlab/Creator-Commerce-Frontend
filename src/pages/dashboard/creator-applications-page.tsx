@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Eye, RefreshCcw, Search } from "lucide-react";
+import { Copy, ExternalLink, Eye, RefreshCcw, Search } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import {
   approveBrandCreatorApplication,
@@ -55,6 +55,8 @@ export function CreatorApplicationsPage() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [approvingApplicationId, setApprovingApplicationId] = useState<string | null>(null);
+  const [copiedTrackingLinkId, setCopiedTrackingLinkId] = useState<string | null>(null);
 
   const isBrandManager = user?.role === "BRAND_MANAGER";
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
@@ -104,22 +106,42 @@ export function CreatorApplicationsPage() {
       return;
     }
 
+    setApprovingApplicationId(application.id);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
     try {
-      const updatedApplication = await approveBrandCreatorApplication(token, application.id);
+      const approvalResult = await approveBrandCreatorApplication(token, application.id);
       setApplications((currentApplications) =>
         currentApplications.map((item) =>
           item.id === application.id
-            ? {
-                ...item,
-                status: updatedApplication.status,
-                reviewedAt: updatedApplication.reviewedAt,
-              }
+            ? approvalResult.application
             : item,
         ),
       );
-      setSuccessMessage("Application approved successfully.");
+      setSuccessMessage("Application approved and tracking link generated.");
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
+    } finally {
+      setApprovingApplicationId(null);
+    }
+  };
+
+  const handleCopyTrackingLink = async (application: ReviewerApplication) => {
+    if (!application.trackingLink) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(application.trackingLink.trackingUrl);
+      setCopiedTrackingLinkId(application.trackingLink.id);
+      window.setTimeout(() => {
+        setCopiedTrackingLinkId((currentId) =>
+          currentId === application.trackingLink?.id ? null : currentId,
+        );
+      }, 1800);
+    } catch {
+      setErrorMessage("Could not copy link. Please copy manually.");
     }
   };
 
@@ -220,6 +242,7 @@ export function CreatorApplicationsPage() {
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Proposed Content</th>
                   <th className="px-6 py-4">Platform</th>
+                  <th className="px-6 py-4">Tracking Link</th>
                   <th className="px-6 py-4">Expected Post Date</th>
                   <th className="px-6 py-4">Applied At</th>
                   <th className="px-6 py-4">Actions</th>
@@ -237,20 +260,84 @@ export function CreatorApplicationsPage() {
                     <td className="px-6 py-4"><StatusBadge status={application.status} /></td>
                     <td className="px-6 py-4">{application.proposedContentType?.replaceAll("_", " ") || "Not set"}</td>
                     <td className="px-6 py-4">{application.primaryPlatform || "Not set"}</td>
+                    <td className="px-6 py-4">
+                      {approvingApplicationId === application.id ? (
+                        <span className="text-sm font-semibold text-sky-700">
+                          Generating tracking link...
+                        </span>
+                      ) : application.trackingLink ? (
+                        <div className="grid min-w-64 gap-2">
+                          <a
+                            href={application.trackingLink.trackingUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="max-w-xs truncate text-sky-700 underline underline-offset-4"
+                          >
+                            {application.trackingLink.trackingUrl}
+                          </a>
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => void handleCopyTrackingLink(application)}
+                            >
+                              <Copy className="mr-2 h-4 w-4" />
+                              {copiedTrackingLinkId === application.trackingLink.id
+                                ? "Link copied"
+                                : "Copy Link"}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() =>
+                                window.open(
+                                  application.trackingLink?.trackingUrl,
+                                  "_blank",
+                                  "noopener,noreferrer",
+                                )
+                              }
+                            >
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Open
+                            </Button>
+                          </div>
+                        </div>
+                      ) : application.status === "APPROVED" ? (
+                        <span className="text-sm font-semibold text-amber-700">
+                          Link missing
+                        </span>
+                      ) : application.status === "APPLIED" ? (
+                        "Not generated yet"
+                      ) : (
+                        "Not available"
+                      )}
+                    </td>
                     <td className="px-6 py-4">{formatDate(application.expectedPostDate)}</td>
                     <td className="px-6 py-4">{formatDate(application.appliedAt)}</td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
                         <Button type="button" variant="outline" className="justify-start gap-2" onClick={() => { setSelectedApplication(application); setIsDetailsOpen(true); }}>
                           <Eye className="h-4 w-4" />
                           View
                         </Button>
                         {isBrandManager && application.status === "APPLIED" ? (
                           <>
-                            <Button type="button" variant="outline" onClick={() => void handleApprove(application)}>
-                              Approve
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={approvingApplicationId === application.id}
+                              onClick={() => void handleApprove(application)}
+                            >
+                              {approvingApplicationId === application.id
+                                ? "Generating link..."
+                                : "Approve"}
                             </Button>
-                            <Button type="button" variant="outline" onClick={() => { setSelectedApplication(application); setRejectionReason(""); setIsRejectOpen(true); }}>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={approvingApplicationId === application.id}
+                              onClick={() => { setSelectedApplication(application); setRejectionReason(""); setIsRejectOpen(true); }}
+                            >
                               Reject
                             </Button>
                           </>
@@ -277,6 +364,7 @@ export function CreatorApplicationsPage() {
                 <p><span className="font-bold text-foreground">Creator:</span> {selectedApplication.creator.displayName}</p>
                 <p className="mt-3"><span className="font-bold text-foreground">Message:</span> {selectedApplication.message || "No message provided."}</p>
                 <p className="mt-3"><span className="font-bold text-foreground">Platform:</span> {selectedApplication.primaryPlatform || "Not set"}</p>
+                <p className="mt-3"><span className="font-bold text-foreground">Tracking Link:</span> {selectedApplication.trackingLink?.trackingUrl || "Not generated"}</p>
               </Card>
               <Card className="p-5">
                 <p><span className="font-bold text-foreground">Brand:</span> {selectedApplication.brand.name}</p>

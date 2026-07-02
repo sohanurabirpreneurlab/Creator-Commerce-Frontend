@@ -1,7 +1,5 @@
-import { env } from "@/config/env";
+import { apiRequest } from "@/lib/api-request";
 import {
-  ApiErrorResponse,
-  ApiSuccessResponse,
   ProfileResponse,
   UpdateProfilePayload,
 } from "@/types/profile";
@@ -11,23 +9,7 @@ async function request<T>(
   token: string,
   options: RequestInit = {},
 ) {
-  const response = await fetch(`${env.apiBaseUrl}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(options.headers ?? {}),
-    },
-    ...options,
-  });
-
-  const payload = (await response.json()) as
-    | ApiSuccessResponse<T>
-    | ApiErrorResponse;
-
-  if (!response.ok || !payload.success) {
-    throw new Error(payload.message || "Request failed.");
-  }
-
+  const payload = await apiRequest<T>(path, { ...options, token });
   return payload.data;
 }
 

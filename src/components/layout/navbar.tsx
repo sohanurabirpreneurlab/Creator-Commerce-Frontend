@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LogOut, Menu, Search, Settings, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AuthModal } from "@/components/auth/auth-modal";
+import { NotificationBell } from "@/components/dashboard/notifications/notification-bell";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Logo } from "./logo";
@@ -83,12 +84,16 @@ export function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
-            <button
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white text-muted transition-colors hover:text-foreground"
-              aria-label="Search"
-            >
-              <Search className="h-4 w-4" />
-            </button>
+            {isAuthenticated ? (
+              <NotificationBell />
+            ) : (
+              <button
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white text-muted transition-colors hover:text-foreground"
+                aria-label="Search"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            )}
             {isAuthenticated && user ? (
               <div className="relative" ref={desktopProfileMenuRef}>
                 <button
@@ -155,46 +160,49 @@ export function Navbar() {
 
           <div className="flex items-center gap-2 lg:hidden">
             {isAuthenticated && user ? (
-              <div className="relative" ref={mobileProfileMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setProfileMenuOpen((current) => !current)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-white"
-                >
-                  {initials}
-                </button>
-                {profileMenuOpen ? (
-                  <div className="absolute right-0 mt-3 w-48 rounded-3xl border border-border bg-white p-2 shadow-hero">
-                    <Link
-                      to="/dashboard/profile"
-                      onClick={() => setProfileMenuOpen(false)}
-                      className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
-                    >
-                      <User className="h-4 w-4 text-primary-dark" />
-                      <span className="w-full text-left">Profile</span>
-                    </Link>
-                    <Link
-                      to="/dashboard/settings"
-                      onClick={() => setProfileMenuOpen(false)}
-                      className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
-                    >
-                      <Settings className="h-4 w-4 text-primary-dark" />
-                      <span className="w-full text-left">Settings</span>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        logout();
-                        setProfileMenuOpen(false);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-rose-500 transition-colors hover:bg-rose-50"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </button>
-                  </div>
-                ) : null}
-              </div>
+              <>
+                <NotificationBell />
+                <div className="relative" ref={mobileProfileMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setProfileMenuOpen((current) => !current)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-white"
+                  >
+                    {initials}
+                  </button>
+                  {profileMenuOpen ? (
+                    <div className="absolute right-0 mt-3 w-48 rounded-3xl border border-border bg-white p-2 shadow-hero">
+                      <Link
+                        to="/dashboard/profile"
+                        onClick={() => setProfileMenuOpen(false)}
+                        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
+                      >
+                        <User className="h-4 w-4 text-primary-dark" />
+                        <span className="w-full text-left">Profile</span>
+                      </Link>
+                      <Link
+                        to="/dashboard/settings"
+                        onClick={() => setProfileMenuOpen(false)}
+                        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
+                      >
+                        <Settings className="h-4 w-4 text-primary-dark" />
+                        <span className="w-full text-left">Settings</span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          logout();
+                          setProfileMenuOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-rose-500 transition-colors hover:bg-rose-50"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              </>
             ) : (
               <>
                 <Button

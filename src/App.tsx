@@ -3,6 +3,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { RoleProtectedRoute } from "@/components/auth/role-protected-route";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { PlaceholderDashboardPage } from "@/components/dashboard/placeholder-dashboard-page";
+import { NotificationProvider } from "@/contexts/notification-provider";
 import { LandingPage } from "@/components/landing/landing-page";
 import { Navbar } from "@/components/layout/navbar";
 import { OverviewPage } from "@/pages/dashboard/overview-page";
@@ -62,12 +63,14 @@ function FutureDashboardPlaceholder({
 
 function PublicHomePage() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main>
-        <LandingPage />
-      </main>
-    </div>
+    <NotificationProvider>
+      <div className="min-h-screen">
+        <Navbar />
+        <main>
+          <LandingPage />
+        </main>
+      </div>
+    </NotificationProvider>
   );
 }
 

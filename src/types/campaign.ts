@@ -126,6 +126,11 @@ export interface CreatorApplication {
     name: string;
     logoUrl: string | null;
   };
+  trackingLink: {
+    id: string;
+    shortCode: string;
+    trackingUrl: string;
+  } | null;
 }
 
 export interface ReviewerApplication {
@@ -163,6 +168,48 @@ export interface ReviewerApplication {
     location: string | null;
     userEmail: string;
   };
+  trackingLink: {
+    id: string;
+    shortCode: string;
+    trackingUrl: string;
+    destinationUrl: string;
+    status: string;
+    createdAt: string;
+  } | null;
+}
+
+export interface CampaignCreatorSummary {
+  id: string;
+  campaignId: string;
+  creatorProfileId: string;
+  campaignApplicationId: string | null;
+  status: string;
+  approvedAt: string;
+  approvedBy: string | null;
+  removedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrackingLinkSummary {
+  id: string;
+  campaignId: string;
+  creatorProfileId: string;
+  campaignCreatorId: string | null;
+  brandId: string;
+  shortCode: string;
+  trackingUrl: string;
+  destinationUrl: string;
+  status: string;
+  generatedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApproveApplicationResponse {
+  application: ReviewerApplication;
+  campaignCreator: CampaignCreatorSummary;
+  trackingLink: TrackingLinkSummary;
 }
 
 export interface AvailableCampaignsQuery {

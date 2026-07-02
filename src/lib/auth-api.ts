@@ -1,29 +1,12 @@
-import { env } from "@/config/env";
+import { apiRequest } from "@/lib/api-request";
 import {
-  ApiErrorResponse,
-  ApiSuccessResponse,
   AuthResult,
   LoginPayload,
   SignUpPayload,
 } from "@/types/auth";
 
 async function request<T>(path: string, options: RequestInit) {
-  const response = await fetch(`${env.apiBaseUrl}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
-    ...options,
-  });
-
-  const payload = (await response.json()) as
-    | ApiSuccessResponse<T>
-    | ApiErrorResponse;
-
-  if (!response.ok || !payload.success) {
-    throw new Error(payload.message || "Request failed.");
-  }
-
+  const payload = await apiRequest<T>(path, options);
   return payload.data;
 }
 
